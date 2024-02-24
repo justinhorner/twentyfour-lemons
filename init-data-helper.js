@@ -11,7 +11,7 @@
 function getBasicEventInfo(data) {
 	//debugger;
 	let url = data.item(0).childNodes[1].href;
-	let eventName = data.item(0).textContent.trim();
+	let eventLocation = data.item(0).textContent.trim();
 	let eventType = '';
 
 	if (url.includes('race')) {
@@ -22,7 +22,7 @@ function getBasicEventInfo(data) {
 
 	return {
 		'url': url,
-		'eventName': eventName,
+		'eventLocation': eventLocation,
 		'eventType': eventType
 	};
 }
@@ -35,7 +35,7 @@ function getEventDate(data) {
 	return originalText;
 }
 
-function getEventSpecialName(data) {
+function getEventName(data) {
 	return data.item(2).textContent.trim();
 }
 
@@ -52,7 +52,7 @@ function processEntries(data) {
 			let cols = colsItem.getElementsByClassName('col-sm');
 			let eventData = getBasicEventInfo(cols);
 			eventData['dateInfo'] = getEventDate(cols);
-			eventData['eventSpecialName'] = getEventSpecialName(cols);
+			eventData['eventName'] = getEventName(cols);
 			entriesData.push(eventData);
 		} catch(e) {
 			console.warn(e);
