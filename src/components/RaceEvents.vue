@@ -1,5 +1,5 @@
 <script setup>
-    import { onMounted, reactive } from 'vue';
+    import { onMounted, reactive, ref, watch } from 'vue';
     import eventsJson from '../assets/events.json';
     import esriConfig from "@arcgis/core/config.js";
     import Map from "@arcgis/core/Map.js";
@@ -7,14 +7,25 @@
     import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
     import Graphic from "@arcgis/core/Graphic.js";
     
-    const data = reactive({ events: [], positions: [] });
+    const data = reactive({ events: [], center: { longitude: 0.0, latitude: 0.0} });
+    const mapCenter = ref([0, 0]);
+
+    /** 
+     * TODOs:
+     * - [ ] get consumable dates added to the events (start / end)
+     * - [ ] improve UI of events
+     *   - [ ] make each event a div and include metadata about the event 
+     *     - metadata should expand when 'selected' and be collapsed when !selected
+     *   - [ ] gray-out items that are in the past
+     *   - [ ] ensure the current / next event is the one selected
+     * - [ ] add location button and support finding nearest event
+     */
 
     onMounted(() => {
         console.log('RaceEvents mounted');
         console.log(`Found ${eventsJson?.length} events in json`);
         data.events = eventsJson;
 
-        console.log(`the component is now mounted.`);
         // TODO: do we really need the API key???
         esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
 
@@ -29,11 +40,22 @@
         const centerLong = data.events[0].location.coordinates.longitude;
         const centerLat = data.events[0].location.coordinates.latitude;
 
+        mapCenter.value = [centerLong, centerLat];
+
         const view = new MapView({
             container: "viewDiv",
             map: map,
-            center: [centerLong, centerLat], //Longitude, latitude
-            zoom: 9,
+            center: mapCenter.value, //Longitude, latitude
+            zoom: 7,
+        });
+
+        // Watch for changes in the mapCenter value and update the map view
+        watch(mapCenter, (newCenter) => {
+            if (view) {
+                view.goTo({
+                    center: newCenter
+                });
+            }
         });
 
         //build points for map graphics
@@ -41,11 +63,21 @@
             const point = buildMapPointGraphic(e);
             graphicsLayer.add(point);
         });
-
-    })
+    });
 
     function eventClicked(event) {
-        console.log(event.target);
+        const element = event.target;
+        console.log(element.innerText);
+        const selectedName = element.innerText;
+        let selectedEvent = data.events.find(e => {
+            return e.name === selectedName;
+        });
+        
+        if (selectedEvent) {
+            const long = selectedEvent.location.coordinates.longitude;
+            const lat = selectedEvent.location.coordinates.latitude;
+            mapCenter.value = [long, lat];
+        }
     }
 
     function buildMapPointGraphic(eventItem) {
@@ -81,16 +113,6 @@
 
         return pointGraphic;
     }
-
-    // function loadPositions() {
-    //     let temps = [];
-    //     data.events.forEach(event => {
-    //         let tempData = event.location.coordinates;
-    //         tempData.name = event.name;
-    //         temps.push(tempData);
-    //     });
-    //     data.positions = temps;
-    // }
 </script>
 
 <template>
