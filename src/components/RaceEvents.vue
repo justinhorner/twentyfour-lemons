@@ -19,6 +19,8 @@
      *   - [ ] gray-out items that are in the past
      *   - [ ] ensure the current / next event is the one selected
      * - [ ] add location button and support finding nearest event
+     *   - https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
+     *   - https://stackoverflow.com/questions/40560949/find-the-closest-coordinate-from-a-set-of-coordinates
      */
 
     onMounted(() => {
