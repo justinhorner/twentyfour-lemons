@@ -6,7 +6,9 @@
     import MapView from '@arcgis/core/views/MapView.js';
     import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer.js";
     import Graphic from "@arcgis/core/Graphic.js";
-    
+    import IconExternalLink from './icons/IconExternalLink.vue';
+    import IconMapPoint from './icons/IconMapPoint.vue';
+
     const data = reactive({ events: [], center: { longitude: 0.0, latitude: 0.0} });
     const mapCenter = ref([0, 0]);
 
@@ -26,7 +28,9 @@
     onMounted(() => {
         console.log('RaceEvents mounted');
         console.log(`Found ${eventsJson?.length} events in json`);
-        data.events = eventsJson;
+        const tempEvents = buildEventObjects();
+        const sortedEvents = [...tempEvents].sort(e => e.startDate);
+        data.events = sortedEvents;
 
         // TODO: do we really need the API key???
         esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
@@ -67,19 +71,60 @@
         });
     });
 
+    function getEventByName(eventName) {
+        let selectedEvent = data.events.find(e => {
+            return e.name === eventName;
+        });
+        return selectedEvent;
+    }
+
+
+    function processEventSelection(eventItem) {
+        const long = eventItem.location.coordinates.longitude;
+        const lat = eventItem.location.coordinates.latitude;
+        mapCenter.value = [long, lat];
+    }
+
     function eventClicked(event) {
         const element = event.target;
         console.log(element.innerText);
-        const selectedName = element.innerText;
-        let selectedEvent = data.events.find(e => {
-            return e.name === selectedName;
-        });
+        const selectedEvent = getEventByName(element.innerText);
         
         if (selectedEvent) {
-            const long = selectedEvent.location.coordinates.longitude;
-            const lat = selectedEvent.location.coordinates.latitude;
-            mapCenter.value = [long, lat];
+            processEventSelection(selectedEvent);
         }
+    }
+
+    function eventIconClicked(eventName, event) {
+        console.log(`You clicked and icon. ${eventName}`);
+        const selectedEvent = getEventByName(eventName);
+        
+        if (selectedEvent) {
+            processEventSelection(selectedEvent);
+        }
+    }
+
+    /**
+     * Builds the raceEvent and adds start and end Date()
+     */
+    function buildEventObjects() {
+        let raceEvents = [];
+        eventsJson.forEach(event => {
+            const re = /([A-Za-z]{3})\s(\d+)\s-\s([A-Za-z]{3})\s(\d+),\s(\d+)/g;
+            let dateInfoStr = event.dateInfo;
+            const matches = [...dateInfoStr.matchAll(re)][0];
+            let startDate = new Date(`${matches[1]} ${matches[2]} ${matches[5]}`);
+            let endDate = new Date(`${matches[3]} ${matches[4]} ${matches[5]}`);
+            let temp = JSON.parse(JSON.stringify(event));
+            temp.dates = {
+                startDate: startDate,
+                endDate: endDate
+            };
+
+
+            raceEvents.push(temp);
+        })
+        return raceEvents;
     }
 
     function buildMapPointGraphic(eventItem) {
@@ -121,10 +166,25 @@
     <div id="mapContainer">
         <div id="eventsContainer">
             <div 
-                class="eventItem" 
+                class="eventItem"
                 @click="eventClicked"
                 v-for="event in data.events">
-                <span>{{ event.name }}</span>
+                <h5>{{ event.name }}</h5>
+                <div class="eventMetadata">
+                    <div>When: {{ event.dateInfo }}</div>
+                    <div>Where: {{ event.eventCourse }}</div>
+                    <div class="mapPointLink" @click="eventIconClicked(event.name, $event)">
+                        <IconMapPoint width="32" height="32" />
+                    </div>
+                    <div class="externalLink">
+                        <a 
+                            :href="event.url" 
+                            target="_blank"
+                            alt="Link to race on 24 Hours of Lemon site">
+                            <IconExternalLink width="32" height="32" />
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="viewDiv"></div>
@@ -157,6 +217,32 @@
 
 .eventItem {
     direction: ltr;
-    padding-left: 3%;
+    padding: 10px 0px 10px 3%;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    margin: 0 5px 5px 0;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.eventMetadata {
+    padding-left: 5%;
+}
+
+.externalLink {
+    position: absolute;
+	bottom: 0;
+    right:0;
+}
+
+.mapPointLink {
+    position: absolute;
+	top: 5px;
+    right:0;
+}
+
+h5 { 
+    font-size: 20px;
+    font-weight: 700;
 }
 </style>
