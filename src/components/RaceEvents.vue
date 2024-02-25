@@ -9,13 +9,20 @@
         console.log(`Found ${eventsJson?.length} events in json`);
         data.events = eventsJson;
     })
+
+    function eventClicked(event) {
+        console.log(event.target);
+    }
 </script>
 
 <template>
     <div id="eventsContainer">
-        <li v-for="event in data.events">
-            {{ event.name }}
-        </li>
+        <div 
+            class="eventItem" 
+            @click="eventClicked"
+            v-for="event in data.events">
+            <span>{{ event.name }}</span>
+        </div>
     </div>
 </template>
 
