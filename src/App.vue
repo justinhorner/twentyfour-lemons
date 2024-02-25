@@ -1,7 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import ArcMap from './components/ArcMap.vue'
 import RaceEvents from './components/RaceEvents.vue'
 </script>
 
@@ -10,11 +9,7 @@ import RaceEvents from './components/RaceEvents.vue'
     <h1>24 Hours of Lemons Events</h1>
   </header>
   <div id="container">
-    <div id="mapContainer">
-      <RaceEvents />
-      <ArcMap />
-    </div>
-    
+    <RaceEvents />
   </div>
 </template>
 
@@ -27,11 +22,6 @@ header {
 #container {
   display: flex;
   width: 100%;
-}
-
-#mapContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
 }
 
 .logo {
