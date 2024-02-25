@@ -1,14 +1,10 @@
 # twentyfour-lemons
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+A site to show [24 Hours of Lemons](https://24hoursoflemons.com) events near you
 
 ## Customize configuration
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+Set the `VITE_ARCGIS_API_KEY` value in the .env file to ensure the ArcGIS component works properly.
 
 ## Project Setup
 
