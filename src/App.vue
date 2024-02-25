@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import RaceEvents from './components/RaceEvents.vue'
+import Footer from './components/Footer.vue'
 </script>
 
 <template>
@@ -11,6 +12,7 @@ import RaceEvents from './components/RaceEvents.vue'
   <div id="container">
     <RaceEvents />
   </div>
+  <Footer />
 </template>
 
 <style scoped>
