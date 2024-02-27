@@ -15,12 +15,6 @@
 
     /** 
      * TODOs:
-     * - [ ] get consumable dates added to the events (start / end)
-     * - [ ] improve UI of events
-     *   - [ ] make each event a div and include metadata about the event 
-     *     - metadata should expand when 'selected' and be collapsed when !selected
-     *   - [ ] gray-out items that are in the past
-     *   - [ ] ensure the current / next event is the one selected
      * - [ ] add location button and support finding nearest event
      *   - https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
      *   - https://stackoverflow.com/questions/40560949/find-the-closest-coordinate-from-a-set-of-coordinates
@@ -252,11 +246,11 @@
 @import "https://js.arcgis.com/4.28/@arcgis/core/assets/esri/themes/light/main.css";
 
 #viewDiv {
-        padding: 0;
-        margin: 0;
-        height: 500px;
-        width: calc(100vw / 2);
-    }
+    padding: 0;
+    margin: 0;
+    height: 500px;
+    width: calc(100vw / 2);
+}
 
 #mapContainer {
   display: grid;
