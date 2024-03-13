@@ -274,6 +274,7 @@
     margin: 0 5px 5px 0;
     margin-bottom: 10px;
     position: relative;
+    cursor: pointer;
 }
 
 .eventItemSelected {
