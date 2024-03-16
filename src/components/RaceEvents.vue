@@ -14,6 +14,7 @@
     const selectedEventName = ref('');
     const externalLinkText = "Link to race on 24 Hours of Lemon site";
     const isMobileDevice = screen.width < 1024;
+    const itemSelectionMapZoom = 9;
 
     /** 
      * TODOs:
@@ -56,7 +57,8 @@
         watch(mapCenter, (newCenter) => {
             if (view) {
                 view.goTo({
-                    center: newCenter
+                    center: newCenter,
+                    zoom: itemSelectionMapZoom
                 });
             }
         });
@@ -93,7 +95,6 @@
     }
 
     function processEventSelection(longitude, latitude, eventName) {
-        // TODO: add re-zoom when this happens
         mapCenter.value = [longitude, latitude];
         selectedEventName.value = eventName;
     }
