@@ -209,6 +209,12 @@
             : 'eventItem';
     }
 
+    function getEventMetadataClass(eventItem) {
+        return new Date(Date.now()) > eventItem.dates.endDate
+            ? 'eventMetadata pastEvent'
+            : 'eventMetadata';
+    }
+
     function getInitialSelectedEventIndex() {
         let index = 0;
         for (let i = 0; i < data.events.length; i++) {
@@ -232,7 +238,7 @@
                 :id="eventItem.key"
                 :class="getEventClass(eventItem)">
                 <div class="eventInfoContainer">
-                    <div class="eventMetadata">
+                    <div :class="getEventMetadataClass(eventItem)">
                         <h5>{{ eventItem.name }}</h5>
                         <div>{{ eventItem.dateInfo }}</div>
                         <div>{{ eventItem.eventCourse }}</div>
@@ -321,6 +327,11 @@
 .eventMetadata {
     align-self: stretch;
     flex-grow: 1;
+}
+
+.pastEvent {
+    font-style: italic;
+    color: var(--faded-color);
 }
 
 .eventInfoIcons {
