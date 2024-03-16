@@ -258,11 +258,11 @@
 }
 
 #eventsContainer {
-    padding: 0;
+    display: block;
+    padding: 0 10px;
     margin: 0;
     height: 500px;
     overflow-y: scroll;
-    width: 500px;
     direction: rtl;
 }
 
