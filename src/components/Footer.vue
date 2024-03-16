@@ -6,13 +6,13 @@
 </template>
 
 <style scoped>
-.footer {
-  position: fixed;
-  left: 0;
-  bottom: 10px;
-  width: 100%;
-  background-color: transparent;
-  color: rgb(175, 175, 175);
-  text-align: center;
-}
+  .footer {
+    position: fixed;
+    left: 0;
+    bottom: 10px;
+    width: 100%;
+    background-color: transparent;
+    color: rgb(175, 175, 175);
+    text-align: center;
+  }
 </style>
