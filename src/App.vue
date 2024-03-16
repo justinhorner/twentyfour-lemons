@@ -1,11 +1,19 @@
 <script setup>
 import RaceEvents from './components/RaceEvents.vue'
 import Footer from './components/Footer.vue'
+import IconLemon from './components/icons/IconLemon.vue';
 </script>
 
 <template>
   <header>
-    <h1>24 Hours of Lemons Events</h1>
+    <div class="header-logo">
+      <!-- Todo: should this toggle map & list view? -->
+      <IconLemon width="32" height="32"/>
+    </div>
+    <div class="header-title">
+      <h1>24 Hours of Lemons Events</h1>
+    </div>
+    <!-- Todo: add Location icon and support finding nearest event -->
   </header>
   <div id="container">
     <RaceEvents />
@@ -16,10 +24,24 @@ import Footer from './components/Footer.vue'
 <style scoped>
 
 header {
-  line-height: 3;
-  max-height: 100vh;
-  padding: 2vh 0vh;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 2vh 0 4vh 0;
+    border-bottom: 1px solid var(--accent-color);
+}
+
+header .header-logo {
+  padding: 0 2vw;
+}
+
+header .header-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+header .header-chunk {
+	width: 160px;
 }
 
 #container {
