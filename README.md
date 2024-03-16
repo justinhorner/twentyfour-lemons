@@ -31,3 +31,16 @@ npm run dev
 ```sh
 npm run build
 ```
+
+
+## Docker
+
+### Build
+```sh
+docker build -t {{tagName}} .
+```
+
+### Run 
+```sh
+docker run -d -p 8080:8080 {{tagName}}
+```
