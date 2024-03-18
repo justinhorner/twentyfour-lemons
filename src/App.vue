@@ -37,6 +37,7 @@ function requestLocation() {
 
 </script>
 
+// TODO: add dark / light mode support
 <template>
   <header>
     <div class="header-logo">

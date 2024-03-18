@@ -37,6 +37,7 @@
 
         esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
 
+        // TODO: add dark / light mode support
         const map = new Map({
             basemap: 'osm/standard',
         });
