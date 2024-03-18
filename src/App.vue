@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import RaceEvents from './components/RaceEvents.vue'
 import Footer from './components/Footer.vue'
+import ImageButton from './components/ImageButton.vue'
 import IconLemon from './components/icons/IconLemon.vue';
 import IconLocate from './components/icons/IconLocate.vue';
 
@@ -44,8 +45,10 @@ function requestLocation() {
     <div class="header-title">
       <h1>24hrs of Lemons Events</h1>
     </div>
-    <div class="header-logo" @click="requestLocation">
-      <IconLocate :width="logoIconSize" :height="logoIconSize"/>
+    <div class="header-logo" >
+      <ImageButton @click="requestLocation">
+        <IconLocate :width="logoIconSize" :height="logoIconSize" color="white"/>
+      </ImageButton>
     </div>
   </header>
   <div id="container">

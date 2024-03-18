@@ -20,8 +20,13 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
-  --accent-color: rgb(0, 189, 125);
   --faded-color: rgb(100, 100, 100);
+
+  --accent-color: rgb(0, 189, 125);
+  --accent-color-active: rgb(0, 168, 112);
+  --accent-color-hover: rgb(0, 175, 117);
+  --accent-color-disabled: rgb(164, 219, 201);
+
 }
 
 /* semantic color variables for this project */
