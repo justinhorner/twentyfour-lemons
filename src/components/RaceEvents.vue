@@ -1,5 +1,5 @@
 <script setup>
-    import { onMounted, reactive, ref, watch } from 'vue';
+    import { onMounted, reactive, ref, watch, toRef } from 'vue';
     import eventsJson from '../assets/events.json';
     import esriConfig from "@arcgis/core/config.js";
     import Map from "@arcgis/core/Map.js";
@@ -9,16 +9,24 @@
     import IconExternalLink from './icons/IconExternalLink.vue';
     import IconMapPoint from './icons/IconMapPoint.vue';
 
+    defineProps({
+        geoCoords: {
+            type: Object,
+            required: false
+        }
+    });
+
+    // if (__props.geoCoords?.value) {
+    //     console.log(`Got lat/long: ${__props.geoCoords.latitude}, ${__props.geoCoords.longitude}`);
+    // }
+
     const data = reactive({ events: [], center: { longitude: 0.0, latitude: 0.0} });
+    const mapCenterProps = toRef(__props, 'geoCoords');
     const mapCenter = ref([0, 0]);
     const selectedEventName = ref('');
-
-    /** 
-     * TODOs:
-     * - [ ] add location button and support finding nearest event
-     *   - https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
-     *   - https://stackoverflow.com/questions/40560949/find-the-closest-coordinate-from-a-set-of-coordinates
-     */
+    const externalLinkText = "Link to race on 24 Hours of Lemon site";
+    const isMobileDevice = screen.width < 1024;
+    const itemSelectionMapZoom = 9;
 
     onMounted(() => {
         //console.log('RaceEvents mounted');
@@ -27,9 +35,9 @@
         const sortedEvents = [...tempEvents].sort(e => e.startDate);
         data.events = sortedEvents;
 
-        // TODO: do we really need the API key???
         esriConfig.apiKey = import.meta.env.VITE_ARCGIS_API_KEY;
 
+        // TODO: add dark / light mode support
         const map = new Map({
             basemap: 'osm/standard',
         });
@@ -45,7 +53,7 @@
         processEventSelection(centerLong, centerLat, data.events[initialIndex].name);
 
         const view = new MapView({
-            container: "viewDiv",
+            container: "mapView",
             map: map,
             center: mapCenter.value, //Longitude, latitude
             zoom: 7,
@@ -55,10 +63,21 @@
         watch(mapCenter, (newCenter) => {
             if (view) {
                 view.goTo({
-                    center: newCenter
+                    center: newCenter,
+                    zoom: itemSelectionMapZoom
                 });
             }
         });
+
+        watch(mapCenterProps, (newMapCenterProps) => {
+            if (newMapCenterProps && view) {
+                const newCenter = [newMapCenterProps.longitude, newMapCenterProps.latitude];
+                view.goTo({
+                    center: newCenter,
+                    zoom: 6
+                });
+            }
+        })
 
         view.on('click', function(event) {
             let screenPoint = {
@@ -92,7 +111,6 @@
     }
 
     function processEventSelection(longitude, latitude, eventName) {
-        // TODO: add re-zoom when this happens
         mapCenter.value = [longitude, latitude];
         selectedEventName.value = eventName;
     }
@@ -130,8 +148,8 @@
                 selectedEvent.location.coordinates.longitude,
                 selectedEvent.location.coordinates.latitude,
                 selectedEvent.name);
-
-            document.getElementById(selectedEvent.key).scrollIntoView();
+            let options = { behavior: "smooth", block: "center" };
+            document.getElementById(selectedEvent.key).scrollIntoView(options);
         }
     }
 
@@ -174,6 +192,8 @@
             }
         };
 
+        let pointGraphic = null;
+
         const popupTemplate = {
             title: "{Name}",
             content: "{Description}"
@@ -183,20 +203,32 @@
             Description: `${eventItem.eventCourse} | ${eventItem.dateInfo}`
         }
 
-        const pointGraphic = new Graphic({
-            geometry: point,
-            symbol: simpleMarkerSymbol,
-            attributes: attributes,
-            popupTemplate: popupTemplate
-        });
-
-        return pointGraphic;
+        if (isMobileDevice) {
+            return new Graphic({
+                geometry: point,
+                symbol: simpleMarkerSymbol,
+                attributes: attributes
+            });
+        } else {
+            return new Graphic({
+                geometry: point,
+                symbol: simpleMarkerSymbol,
+                attributes: attributes,
+                popupTemplate: popupTemplate
+            });
+        }
     }
 
     function getEventClass(eventItem) {
         return eventItem.name === selectedEventName.value
             ? 'eventItem eventItemSelected'
             : 'eventItem';
+    }
+
+    function getEventMetadataClass(eventItem) {
+        return new Date(Date.now()) > eventItem.dates.endDate
+            ? 'eventMetadata pastEvent'
+            : 'eventMetadata';
     }
 
     function getInitialSelectedEventIndex() {
@@ -212,7 +244,8 @@
 </script>
 
 <template>
-    <div id="mapContainer">
+    <div id="bodyContainer">
+        <div id="mapView"></div>
         <div id="eventsContainer">
             <div 
                 @click="eventClicked"
@@ -220,54 +253,72 @@
                 :key="eventItem.key"
                 :id="eventItem.key"
                 :class="getEventClass(eventItem)">
-                <h5>{{ eventItem.name }}</h5>
-                <div class="eventMetadata">
-                    <div>When: {{ eventItem.dateInfo }}</div>
-                    <div>Where: {{ eventItem.eventCourse }}</div>
-                    <div class="mapPointLink" @click="eventIconClicked(eventItem.name, $event)">
-                        <IconMapPoint width="32" height="32" />
+                <div class="eventInfoContainer">
+                    <div :class="getEventMetadataClass(eventItem)">
+                        <h5>{{ eventItem.name }}</h5>
+                        <div>{{ eventItem.dateInfo }}</div>
+                        <div>{{ eventItem.eventCourse }}</div>
                     </div>
-                    <div class="externalLink">
-                        <a 
-                            :href="eventItem.url" 
-                            target="_blank"
-                            alt="Link to race on 24 Hours of Lemon site">
-                            <IconExternalLink width="32" height="32" />
-                        </a>
+                    <div class="eventInfoIcons">
+                        <div class="mapPointLink" @click="eventIconClicked(eventItem.name, $event)">
+                        <IconMapPoint width="32" height="32" />
+                        </div>
+                        <div class="externalLink">
+                            <a 
+                                :href="eventItem.url" 
+                                target="_blank"
+                                :alt="externalLinkText"
+                                :title="externalLinkText">
+                                <IconExternalLink width="32" height="32" />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="viewDiv"></div>
     </div>
 </template>
 
 <style scoped>
 @import "https://js.arcgis.com/4.28/@arcgis/core/assets/esri/themes/light/main.css";
 
-#viewDiv {
+#mapView {
     padding: 0;
     margin: 0;
-    height: 500px;
-    width: calc(100vw / 2);
+    height: calc(100vh / 1.75);
+    width: calc(100vw / 1.75);
 }
 
-#mapContainer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+#bodyContainer {
+  display: flex;
+  flex-direction: row;
 }
 
 #eventsContainer {
-    padding: 0;
+    display: block;
+    padding: 0 10px;
     margin: 0;
-    height: 500px;
+    height: calc(100vh / 1.75);
     overflow-y: scroll;
-    width: 500px;
-    direction: rtl;
+}
+
+@media (max-width: 960px) and (max-width:480px) {
+    #bodyContainer {
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    #mapView {
+        width: 100%;
+        height: calc(100vh / 2.5);
+    }
+
+    #eventsContainer {
+        height: calc(100vh / 2.5);
+    }
 }
 
 .eventItem {
-    direction: ltr;
     padding: 10px 0px 10px 3%;
     border: 1px solid rgb(72, 72, 72);
     border-radius: 5px;
@@ -281,20 +332,39 @@
     border: 2px solid var(--accent-color);
 }
 
-.eventMetadata {
-    padding-left: 5%;
+.eventInfoContainer {
+    display: flex;
+    flex-wrap: nowrap;
+    align-content: space-between;
+    flex-direction: row;
+    align-items: flex-start;
 }
 
-.externalLink {
-    position: absolute;
-	bottom: 0;
-    right:0;
+.eventMetadata {
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+.pastEvent {
+    font-style: italic;
+    color: var(--faded-color);
+}
+
+.eventInfoIcons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
 }
 
 .mapPointLink {
+    align-content: flex-start;
+}
+
+.externalLink {
+    bottom: 0;
     position: absolute;
-	top: 5px;
-    right:0;
+    right: 2px;
 }
 
 h5 { 

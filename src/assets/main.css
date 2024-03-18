@@ -1,7 +1,7 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  /* max-width: 1280px; */
   margin: 0 auto;
   padding: 2rem;
   font-weight: normal;
@@ -15,6 +15,10 @@ a,
   padding: 3px;
 }
 
+h1 {
+  font-size: 2rem;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
@@ -24,10 +28,17 @@ a,
 @media (min-width: 1024px) {
   body {
     display: flex;
-    place-items: center;
+    /* place-items: center; */
+  }
+}
+
+
+@media (max-width: 960px) and (max-width:480px) {
+  h1 {
+    font-size: 1.5rem;
   }
 
   #app {
-    padding: 0 2rem;
+    padding: 0 10px;
   }
 }
