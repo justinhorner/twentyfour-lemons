@@ -1,10 +1,38 @@
 <script setup>
+import { ref } from 'vue';
 import RaceEvents from './components/RaceEvents.vue'
 import Footer from './components/Footer.vue'
 import IconLemon from './components/icons/IconLemon.vue';
+import IconLocate from './components/icons/IconLocate.vue';
 
 const isMobileDevice = screen.width < 1024;
 const logoIconSize = isMobileDevice ? 20 : 32;
+
+const geoCoords = ref({latitude: null, longitude: null});
+
+function requestLocation() {
+  const options = {
+  enableHighAccuracy: true,
+  timeout: 5000,
+  maximumAge: 0,
+  };
+
+  function success(pos) {
+    const crd = pos.coords;
+
+    geoCoords.value = {
+      latitude: crd.latitude,
+      longitude: crd.longitude
+    };
+  }
+
+  function error(err) {
+    alert('Oops, we failed to get the geolocation information.  Please try again later');
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+  }
+
+  navigator.geolocation.getCurrentPosition(success, error, options);
+}
 
 </script>
 
@@ -16,10 +44,12 @@ const logoIconSize = isMobileDevice ? 20 : 32;
     <div class="header-title">
       <h1>24hrs of Lemons Events</h1>
     </div>
-    <!-- Todo: add Location icon and support finding nearest event -->
+    <div class="header-logo" @click="requestLocation">
+      <IconLocate :width="logoIconSize" :height="logoIconSize"/>
+    </div>
   </header>
   <div id="container">
-    <RaceEvents />
+    <RaceEvents :geoCoords="geoCoords" />
   </div>
   <Footer />
 </template>

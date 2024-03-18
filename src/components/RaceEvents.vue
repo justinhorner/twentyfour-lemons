@@ -1,5 +1,5 @@
 <script setup>
-    import { onMounted, reactive, ref, watch } from 'vue';
+    import { onMounted, reactive, ref, watch, toRef } from 'vue';
     import eventsJson from '../assets/events.json';
     import esriConfig from "@arcgis/core/config.js";
     import Map from "@arcgis/core/Map.js";
@@ -9,19 +9,24 @@
     import IconExternalLink from './icons/IconExternalLink.vue';
     import IconMapPoint from './icons/IconMapPoint.vue';
 
+    defineProps({
+        geoCoords: {
+            type: Object,
+            required: false
+        }
+    });
+
+    // if (__props.geoCoords?.value) {
+    //     console.log(`Got lat/long: ${__props.geoCoords.latitude}, ${__props.geoCoords.longitude}`);
+    // }
+
     const data = reactive({ events: [], center: { longitude: 0.0, latitude: 0.0} });
+    const mapCenterProps = toRef(__props, 'geoCoords');
     const mapCenter = ref([0, 0]);
     const selectedEventName = ref('');
     const externalLinkText = "Link to race on 24 Hours of Lemon site";
     const isMobileDevice = screen.width < 1024;
     const itemSelectionMapZoom = 9;
-
-    /** 
-     * TODOs:
-     * - [ ] add location button and support finding nearest event
-     *   - https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
-     *   - https://stackoverflow.com/questions/40560949/find-the-closest-coordinate-from-a-set-of-coordinates
-     */
 
     onMounted(() => {
         //console.log('RaceEvents mounted');
@@ -62,6 +67,16 @@
                 });
             }
         });
+
+        watch(mapCenterProps, (newMapCenterProps) => {
+            if (newMapCenterProps && view) {
+                const newCenter = [newMapCenterProps.longitude, newMapCenterProps.latitude];
+                view.goTo({
+                    center: newCenter,
+                    zoom: 6
+                });
+            }
+        })
 
         view.on('click', function(event) {
             let screenPoint = {
